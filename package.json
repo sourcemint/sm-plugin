@@ -1,8 +1,8 @@
 {
-	"name": "sm-plugin",
-	"version": "0.1.0",
-	"pm": "sm",
-	"main": "./plugin.js",
+    "name": "sm-plugin",
+    "version": "0.1.1",
+    "pm": "sm",
+    "main": "./plugin.js",
     "mappings": {
         "sm-plugin-git": "github.com/sourcemint/sm-plugin-git/~0.1.0",
         "sm-plugin-npm": "github.com/sourcemint/sm-plugin-npm/~0.1.0",
