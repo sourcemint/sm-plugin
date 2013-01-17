@@ -1,0 +1,18 @@
+{
+	"name": "sm-plugin",
+	"version": "0.1.0",
+	"pm": "sm",
+	"main": "./plugin.js",
+    "mappings": {
+        "sm-plugin-git": "github.com/sourcemint/sm-plugin-git/~0.1.0",
+        "sm-plugin-npm": "github.com/sourcemint/sm-plugin-npm/~0.1.0",
+        "sm-plugin-github": "github.com/sourcemint/sm-plugin-github/~0.1.0",
+        "sm-plugin-sm": "github.com/sourcemint/sm-plugin-sm/~0.1.0",
+        "sm-plugin-tar": "github.com/sourcemint/sm-plugin-tar/~0.1.0",
+        "sm-plugin-zip": "github.com/sourcemint/sm-plugin-zip/~0.1.0",
+        "sm-plugin-archive": "github.com/sourcemint/sm-plugin-archive/~0.1.0",
+        "sm-plugin-make": "github.com/sourcemint/sm-plugin-make/~0.1.0",
+        "sm-plugin-url": "github.com/sourcemint/sm-plugin-url/~0.1.0",
+        "sm-plugin-stree": "github.com/sourcemint/sm-plugin-stree/~0.1.0"
+    }
+}
