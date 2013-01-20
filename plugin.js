@@ -75,6 +75,10 @@ Plugin.prototype.install = function(packagePath, options) {
 	return this.API.Q.resolve();
 }
 
+Plugin.prototype.export = function(path, options) {
+	return this.API.Q.reject(new Error("TODO: Implement `export()` for pm '" + this.pluginId + "'."));
+}
+
 Plugin.prototype.bump = function(options) {
 	return this.node.getPlugin("git").then(function(pm) {
 		return pm.bump(options);
