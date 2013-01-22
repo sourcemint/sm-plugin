@@ -93,6 +93,7 @@ Plugin.prototype.publish = function(options) {
 Plugin.prototype.postinstall = function(node, options) {
 	var self = this;
 	return self.API.Q.call(function() {
+		if (!node.parent) return;
 		var bin = {};
 		// TODO: The descriptor should be merged by the time we use it here.
 		if (node.descriptors.package && node.descriptors.package.bin) {
