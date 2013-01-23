@@ -106,7 +106,9 @@ Plugin.prototype.postinstall = function(node, options) {
 		if (bin && self.API.UTIL.len(bin) > 0) {
 			self.API.UTIL.forEach(bin, function(bin) {
 				var binName = bin[0];
+				var plainBinName = null;
 				if (binName !== node.name) {
+					plainBinName = binName;
 					binName = node.name + "-" + binName;
 				}
 				var linkPath = PATH.join(node.parent.path, ".sm", "bin", binName);
@@ -129,6 +131,12 @@ Plugin.prototype.postinstall = function(node, options) {
 					FS.chmodSync(linkPath, 0755);
 					if (node.level === 1) {
 						FS.writeFileSync(PATH.join(node.top.path, ".sm-reload-shell"), "");
+					}
+				}
+				if (plainBinName) {
+					linkPath = PATH.join(node.parent.path, ".sm", "bin", plainBinName);
+					if (!PATH.existsSync(linkPath)) {
+						FS.symlinkSync(binName, linkPath);
 					}
 				}
 			});
