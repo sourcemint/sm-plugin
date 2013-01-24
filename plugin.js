@@ -96,8 +96,8 @@ Plugin.prototype.postinstall = function(node, options) {
 		if (!node.parent) return;
 		var bin = {};
 		// TODO: The descriptor should be merged by the time we use it here.
-		if (node.descriptors.package && node.descriptors.package.bin) {
-			bin = self.API.UTIL.copy(node.descriptors.package.bin);
+		if (node.descriptor.package && node.descriptor.package.bin) {
+			bin = self.API.UTIL.copy(node.descriptor.package.bin);
 		}
 		if (node.descriptors.locator && node.descriptors.locator.descriptor && node.descriptors.locator.descriptor.bin) {
 			self.API.UTIL.update(bin, node.descriptors.locator.descriptor.bin);
