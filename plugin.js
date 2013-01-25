@@ -95,7 +95,7 @@ Plugin.prototype.publish = function(options) {
 // Called once package is placed in final destination in dependency tree.
 Plugin.prototype.postinstall = function(node, options) {
 	var self = this;
-	return self.API.Q.call(function() {
+	return self.API.Q.fcall(function() {
 		if (!node.parent) return;
 		var bin = {};
 		// TODO: The descriptor should be merged by the time we use it here.
@@ -105,7 +105,7 @@ Plugin.prototype.postinstall = function(node, options) {
 		if (node.descriptors.locator && node.descriptors.locator.descriptor && node.descriptors.locator.descriptor.bin) {
 			self.API.UTIL.update(bin, node.descriptors.locator.descriptor.bin);
 		}
-		var done = self.API.Q.ref();
+		var done = self.API.Q.resolve();
 		if (bin && self.API.UTIL.len(bin) > 0) {
 			self.API.UTIL.forEach(bin, function(bin) {
 				var binName = bin[0];
