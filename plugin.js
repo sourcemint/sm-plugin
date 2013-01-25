@@ -8,21 +8,21 @@ const HTTPS = require("https");
 
 var externalProxies = {};
 
-exports.for = function(API, core, node, pluginId) {
+exports.for = function(API, core, node, pluginId, callback) {
 	try {
 		var id = "sm-plugin-" + pluginId;
 		// TODO: Use dynamic `node.core.require(id)` here.
 		var pluginModule = require(id);
 		if (typeof pluginModule.for !== "function") {
-			throw new Error("Plugin '" + id + "' does not implement `exports.for = function(plugin)`.");
+			return callback(new Error("Plugin '" + id + "' does not implement `exports.for = function(plugin)`."));
 		}
 		var PluginInstance = function() {}
 		PluginInstance.prototype = new Plugin(API, core, node, pluginId);
 		var pluginInstance = new PluginInstance();
 		pluginModule.for(API, pluginInstance);
-		return API.Q.resolve(pluginInstance);
+		return callback(null, pluginInstance);
 	} catch(err) {
-		return API.Q.reject(err);
+		return callback(err);
 	}
 }
 
@@ -76,9 +76,12 @@ Plugin.prototype.install = function(packagePath, options) {
 }
 
 Plugin.prototype.bump = function(options) {
-	return this.node.getPlugin("git").then(function(pm) {
-		return pm.bump(options);
+	var deferred = this.API.Q.defer();
+	this.node.getPlugin("git", function(err, pm) {
+		if (err) return deferred.reject(err);
+		return pm.bump(options).then(deferred.resolve, deferred.reject);
 	});
+	return deferred.promise;
 }
 
 Plugin.prototype.export = function(path, options) {
