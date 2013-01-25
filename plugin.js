@@ -67,8 +67,8 @@ Plugin.prototype.latest = function(options) {
 	return this.API.Q.resolve(false);	
 }
 
-Plugin.prototype.download = function(uri, options) {
-	return this.fetchExternalUri(uri, options);
+Plugin.prototype.download = function(uri, options, callback) {
+	return this.fetchExternalUri(uri, options, callback);
 }
 
 Plugin.prototype.install = function(packagePath, options) {
@@ -148,7 +148,7 @@ Plugin.prototype.postinstall = function(node, options) {
 
 // Helper functions.
 
-Plugin.prototype.fetchExternalUri = function(uri, options) {
+Plugin.prototype.fetchExternalUri = function(uri, options, callback) {
 	var self = this;
 	// TODO: Keep meta info about FS path and compare on subsequent calls so we can return 304 or 200.
 	if (/^\//.test(uri)) {
@@ -171,7 +171,7 @@ Plugin.prototype.fetchExternalUri = function(uri, options) {
         opts.loadBody = false;
 	}
 	opts.logger.info("Fetching `" + uri + "` to external uri cache");
-    return self.externalUriCache.get(uri, opts);
+    return self.externalUriCache.get(uri, opts, callback);
 }
 
 // TODO: Relocate core logic to `sm-proxy`.
@@ -197,16 +197,18 @@ Plugin.prototype.getExternalProxy = function(options) {
 				var uri = "https://" + host + ":" + port + req.url;
 				var opts = self.API.UTIL.copy(options);
 				opts.loadBody = true;
-				return self.fetchExternalUri(uri, opts).then(function(result) {
+				return self.fetchExternalUri(uri, opts, function(err, result) {
+					if (err) {
+						res.writeHead(500);
+						console.error(err.stack);
+						res.end("Internal server error");
+						return;
+					}
 					if (typeof result.body === "undefined") {
 						result.headers["content-length"] = 0;
 					}
 					res.writeHead((result.status===304)?200:result.status, result.headers);
 					res.end(result.body || "");
-				}, function(err) {
-					res.writeHead(500);
-					console.error(err.stack);
-					res.end("Internal server error");
 				});
 			} else {
 		        proxy.proxyRequest(req, res);
@@ -240,5 +242,10 @@ Plugin.prototype.getLatestInfoCache = function(uri, responder, options) {
 	}
     opts.loadBody = true;
 	opts.logger.info("Fetching `" + uri + "` to latest info cache");
-    return self.latestInfoCache.get(uri, opts);
+	var deferred = self.API.Q.defer();
+    self.latestInfoCache.get(uri, opts, function(err, response) {
+    	if (err) return deferred.reject(err);
+    	return deferred.resolve(response);
+    });
+    return deferred.promise;
 }
