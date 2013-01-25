@@ -233,7 +233,7 @@ Plugin.prototype.getExternalProxy = function(options) {
 	return deferred.promise;
 }
 
-Plugin.prototype.getLatestInfoCache = function(uri, responder, options) {
+Plugin.prototype.getLatestInfoCache = function(uri, responder, options, callback) {
 	var self = this;
 	var opts = self.API.UTIL.copy(options);
 	opts.responder = responder;
@@ -242,10 +242,5 @@ Plugin.prototype.getLatestInfoCache = function(uri, responder, options) {
 	}
     opts.loadBody = true;
 	opts.logger.info("Fetching `" + uri + "` to latest info cache");
-	var deferred = self.API.Q.defer();
-    self.latestInfoCache.get(uri, opts, function(err, response) {
-    	if (err) return deferred.reject(err);
-    	return deferred.resolve(response);
-    });
-    return deferred.promise;
+    return self.latestInfoCache.get(uri, opts, callback);
 }
