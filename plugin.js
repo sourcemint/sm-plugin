@@ -53,8 +53,8 @@ var Plugin = function(API, core, node, pluginId) {
 }
 
 // Resolve a locator descriptor to a fully qualified locator object.
-Plugin.prototype.resolveLocator = function(locator, options) {
-	return this.API.Q.reject(new Error("TODO: Implement `resolveLocator()` for pm '" + this.pluginId + "'."));
+Plugin.prototype.resolveLocator = function(locator, options, callback) {
+	return callback(new Error("TODO: Implement `resolveLocator()` for pm '" + this.pluginId + "'."));
 }
 
 // Get the current status of the package in the working tree.
