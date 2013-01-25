@@ -63,8 +63,8 @@ Plugin.prototype.status = function(options) {
 }
 
 // Get the latest status of the package by contacting remote and storing in cache.
-Plugin.prototype.latest = function(options) {
-	return this.API.Q.resolve(false);	
+Plugin.prototype.latest = function(options, callback) {
+	return callback(null, false);	
 }
 
 Plugin.prototype.download = function(uri, options, callback) {
