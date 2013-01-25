@@ -178,20 +178,34 @@ Plugin.prototype.fetchExternalUri = function(uri, options, callback) {
 }
 
 // TODO: Relocate core logic to `sm-proxy`.
-Plugin.prototype.getExternalProxy = function(options) {
+Plugin.prototype.getExternalProxy = function(options, callback) {
 	var self = this;
-	function ensureProxy(host, port, callback) {
-		var proxyId = host + ":" + port;		
-		if (externalProxies[proxyId]) return callback(null, externalProxies[proxyId][1]);
-	    var proxy = new self.API.HTTP_PROXY.HttpProxy({
-	        target: {
-	        	https: true,
-	        	host: host,
-	        	port: port
-	        },
-	        changeOrigin: true
-	    });
-	    externalProxies[proxyId] = [ HTTPS.createServer({
+
+	var host = options.host;
+	var port = options.port;
+
+	var proxyId = host + ":" + port;		
+	if (externalProxies[proxyId]) {
+		if (API.UTIL.isArrayLike(externalProxies[proxyId])) {
+			externalProxies[proxyId][1].push(callback);
+		} else {
+			callback(null, externalProxies[proxyId][1]);
+		}
+		return;
+	}
+	externalProxies[proxyId] = [
+		callback
+	];
+    var proxy = new self.API.HTTP_PROXY.HttpProxy({
+        target: {
+        	https: true,
+        	host: host,
+        	port: port
+        },
+        changeOrigin: true
+    });
+    var instance = [
+	    HTTPS.createServer({
 	        key: FS.readFileSync(PATH.join(self.API.HELPERS.getInternalConfigPath(), "proxy-ssl-private-key"), "utf8"),
 	        cert: FS.readFileSync(PATH.join(self.API.HELPERS.getInternalConfigPath(), "proxy-ssl.crt"), "utf8")
 		}, function (req, res) {
@@ -216,24 +230,27 @@ Plugin.prototype.getExternalProxy = function(options) {
 			} else {
 		        proxy.proxyRequest(req, res);
 			}
-		}) ];
-	    self.API.OS.getTmpPort(function(err, port) {
-	    	if (err) return callback(err);
-	    	externalProxies[proxyId][1] = {
-	    		host: "localhost",
-	    		port: port
-	    	};
-		    externalProxies[proxyId][0].listen(externalProxies[proxyId][1].port, externalProxies[proxyId][1].host, function() {
-		    	return callback(null, externalProxies[proxyId][1]);
-		    });
+		})
+	];
+    self.API.OS.getTmpPort(function(err, port) {
+    	if (err) {
+    		externalProxies[proxyId].forEach(function(err) {
+    			return callback(err);
+    		})
+    		delete externalProxies[proxyId];
+    		return;
+    	}
+    	instance[1] = {
+    		host: "localhost",
+    		port: port
+    	};
+	    instance[0].listen(instance[1].port, instance[1].host, function() {
+    		externalProxies[proxyId].forEach(function(err) {
+    			return callback(null, instance[1]);
+    		});
+    		externalProxies[proxyId] = instance;
 	    });
-	}
-	var deferred = self.API.Q.defer();
-	ensureProxy(options.host, options.port, function(err, proxy) {
-		if (err) return deferred.reject(err);
-		return deferred.resolve(proxy);
-	});
-	return deferred.promise;
+    });
 }
 
 Plugin.prototype.getLatestInfoCache = function(uri, responder, options, callback) {
