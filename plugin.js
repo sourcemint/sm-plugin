@@ -58,8 +58,8 @@ Plugin.prototype.resolveLocator = function(locator, options, callback) {
 }
 
 // Get the current status of the package in the working tree.
-Plugin.prototype.status = function(options) {
-	return this.API.Q.resolve(false);	
+Plugin.prototype.status = function(options, callback) {
+	return callback(null, false);	
 }
 
 // Get the latest status of the package by contacting remote and storing in cache.
