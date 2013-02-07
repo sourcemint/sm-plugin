@@ -153,18 +153,9 @@ Plugin.prototype.postinstall = function(node, options) {
 
 Plugin.prototype.fetchExternalUri = function(uri, options, callback) {
 	var self = this;
-	// TODO: Keep meta info about FS path and compare on subsequent calls so we can return 304 or 200.
-	if (/^\//.test(uri)) {
-		if (!PATH.existsSync(uri)) {
-			return self.API.Q.resolve({
-				status: 404,
-				cachePath: uri
-			});
-		}
-		return self.API.Q.resolve({
-			status: 200,
-			cachePath: uri
-		});
+    var parsedUri = URL.parse(uri);
+	if (/^\//.test(uri) || parsedUri.protocol === "file:") {
+		return callback(new Error("file uri should have already been caught by `sm-plugin-path` plugin"));
 	}
 	var opts = self.API.UTIL.copy(options);
 	if (typeof opts.ttl === "undefined") {
