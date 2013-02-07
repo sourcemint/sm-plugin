@@ -133,7 +133,7 @@ Plugin.prototype.postinstall = function(node, options) {
 					FS.symlinkSync(sourcePath, linkPath);
 					FS.chmodSync(linkPath, 0755);
 					if (node.level === 1) {
-						FS.writeFileSync(PATH.join(node.top.path, ".sm-reload-shell"), "");
+						FS.writeFileSync(PATH.join(node.top.path, ".sm", ".reload-shell"), "");
 					}
 				}
 				if (plainBinName) {
