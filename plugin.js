@@ -155,7 +155,13 @@ Plugin.prototype.fetchExternalUri = function(uri, options, callback) {
 	var self = this;
     var parsedUri = URL.parse(uri);
 	if (/^\//.test(uri) || parsedUri.protocol === "file:") {
-		return callback(new Error("file uri should have already been caught by `sm-plugin-path` plugin"));
+        return self.node.getPlugin("path", function(err, plugin) {
+            if (err) return callback(err);
+            return plugin.download(uri, options, function(err, response) {
+                if (err) return callback(err);
+                return callback(null, response);
+            });
+        });
 	}
 	var opts = self.API.UTIL.copy(options);
 	if (typeof opts.ttl === "undefined") {
