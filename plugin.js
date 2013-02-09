@@ -1,6 +1,5 @@
 
 const PATH = require("path");
-const FS = require("fs");
 const URL = require("url");
 const HTTP = require("http");
 const HTTPS = require("https");
@@ -117,29 +116,29 @@ Plugin.prototype.postinstall = function(node, options) {
 				var linkPath = PATH.join(node.parent.path, ".sm", "bin", binName);
 				var sourcePath = PATH.join("../..", node.relpath.substring(node.parent.relpath.length) , bin[1]);
 				options.logger.debug("Linking command '" + PATH.join(PATH.dirname(linkPath), sourcePath) + "' to '" + linkPath + "'.");
-				if (PATH.existsSync(linkPath)) {
-					var stat = FS.lstatSync(linkPath);
+				if (self.API.FS.existsSync(linkPath)) {
+					var stat = self.API.FS.lstatSync(linkPath);
 					if (!stat.isSymbolicLink()) {
 						throw new Error("Cannot link '" + PATH.join(PATH.dirname(linkPath), sourcePath) + "' to '" + linkPath + "' as file exists at '" + linkPath + "'.");
 					}
-					var linkVal = FS.readlinkSync(linkPath);
+					var linkVal = self.API.FS.readlinkSync(linkPath);
 					if (linkVal !== sourcePath) {
 						throw new Error("Cannot link '" + PATH.join(PATH.dirname(linkPath), sourcePath) + "' to '" + linkPath + "' as link at '" + linkPath + "' already points to '" + linkVal + "'.");
 					}
 				} else {
-					if (!PATH.existsSync(PATH.dirname(linkPath))) {
-						self.API.FS_RECURSIVE.mkdirSyncRecursive(PATH.dirname(linkPath));
+					if (!self.API.FS.existsSync(PATH.dirname(linkPath))) {
+						self.API.FS.mkdirsSync(PATH.dirname(linkPath));
 					}
-					FS.symlinkSync(sourcePath, linkPath);
-					FS.chmodSync(linkPath, 0755);
+					self.API.FS.symlinkSync(sourcePath, linkPath);
+					self.API.FS.chmodSync(linkPath, 0755);
 					if (node.level === 1) {
-						FS.writeFileSync(PATH.join(node.top.path, ".sm", ".reload-shell"), "");
+						self.API.FS.writeFileSync(PATH.join(node.top.path, ".sm", ".reload-shell"), "");
 					}
 				}
 				if (plainBinName) {
 					linkPath = PATH.join(node.parent.path, ".sm", "bin", plainBinName);
-					if (!PATH.existsSync(linkPath)) {
-						FS.symlinkSync(binName, linkPath);
+					if (!self.API.FS.existsSync(linkPath)) {
+						self.API.FS.symlinkSync(binName, linkPath);
 					}
 				}
 			});
@@ -183,7 +182,7 @@ Plugin.prototype.getExternalProxy = function(options, callback) {
 
 	var proxyId = host + ":" + port;		
 	if (externalProxies[proxyId]) {
-		if (API.UTIL.isArrayLike(externalProxies[proxyId])) {
+		if (self.API.UTIL.isArrayLike(externalProxies[proxyId])) {
 			externalProxies[proxyId][1].push(callback);
 		} else {
 			callback(null, externalProxies[proxyId][1]);
@@ -203,8 +202,8 @@ Plugin.prototype.getExternalProxy = function(options, callback) {
     });
     var instance = [
 	    HTTPS.createServer({
-	        key: FS.readFileSync(PATH.join(self.API.HELPERS.getInternalConfigPath(), "proxy-ssl-private-key"), "utf8"),
-	        cert: FS.readFileSync(PATH.join(self.API.HELPERS.getInternalConfigPath(), "proxy-ssl.crt"), "utf8")
+	        key: self.API.FS.readFileSync(PATH.join(self.API.HELPERS.getInternalConfigPath(), "proxy-ssl-private-key"), "utf8"),
+	        cert: self.API.FS.readFileSync(PATH.join(self.API.HELPERS.getInternalConfigPath(), "proxy-ssl.crt"), "utf8")
 		}, function (req, res) {
 			// Only run `GET` and `HEAD` requests through cache.
 			if (req.method === "GET" || req.method === "HEAD") {
