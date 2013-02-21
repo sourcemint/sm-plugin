@@ -180,7 +180,7 @@ Plugin.prototype.getExternalProxy = function(options, callback) {
 	var host = options.host;
 	var port = options.port;
 
-	var proxyId = host + ":" + port;		
+	var proxyId = host + ":" + port + ":" + options.time;		
 	if (externalProxies[proxyId]) {
 		if (self.API.UTIL.isArrayLike(externalProxies[proxyId])) {
 			externalProxies[proxyId][1].push(callback);
