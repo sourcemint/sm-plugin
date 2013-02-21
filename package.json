@@ -12,6 +12,7 @@
         "sm-plugin-bzip": "github.com/sourcemint/sm-plugin-bzip/~0.1.0",
         "sm-plugin-zip": "github.com/sourcemint/sm-plugin-zip/~0.1.0",
         "sm-plugin-path": "github.com/sourcemint/sm-plugin-path/~0.1.0",
+        "sm-plugin-symlink": "github.com/sourcemint/sm-plugin-symlink/~0.1.0",
         "sm-plugin-archive": "github.com/sourcemint/sm-plugin-archive/~0.1.0",
         "sm-plugin-make": "github.com/sourcemint/sm-plugin-make/~0.1.0",
         "sm-plugin-dmg": "github.com/sourcemint/sm-plugin-dmg/~0.1.0",
