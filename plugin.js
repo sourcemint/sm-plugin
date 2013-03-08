@@ -180,36 +180,38 @@ Plugin.prototype.fetchExternalUri = function(uri, options, callback) {
 	}
 
 	function fetchViaPlugin(callback) {
-		// See if pointer is a URI.
-		var parsedPointer = self.API.URI_PARSER.parse2(uri);
-		if (parsedPointer && parsedPointer.hostname) {
-			// Remove domain ending to leave host name. (e.g. remove `.com`).
-			var hostname = parsedPointer.hostname.split(".");
-			for (var i=hostname.length-1 ; i>=0 ; i--) {
-				if (URI.TLDS.indexOf(hostname[i].toUpperCase()) !== -1) {
-					hostname.splice(i, 1);				
+		try {
+			// See if pointer is a URI.
+			var parsedPointer = self.API.URI_PARSER.parse2(uri);
+			if (parsedPointer && parsedPointer.hostname) {
+				// Remove domain ending to leave host name. (e.g. remove `.com`).
+				var hostname = parsedPointer.hostname.split(".");
+				for (var i=hostname.length-1 ; i>=0 ; i--) {
+					if (URI.TLDS.indexOf(hostname[i].toUpperCase()) !== -1) {
+						hostname.splice(i, 1);				
+					}
 				}
+				// Subdomains should be suffixes, not prefixes.
+				hostname.reverse();
+				var pluginId = hostname.join("-");
+				// `pointer` is a URI so we ask plugin `pluginId` (based on hostname) to resolve locator.
+		        return self.node.getPlugin(pluginId, function(err, plugin) {
+		            if (err) {
+						if (err.message === ("Cannot find module 'sm-plugin-" + pluginId + "'")) return callback(null, false);
+		            	return callback(err);
+		            }
+		            if (!plugin.hasOwnProperty("download")) return callback(null, false);
+					opts.logger.info("Asking plugin '" + pluginId + "' to download '" + uri + "' to external uri cache");
+		            return plugin.download(uri, options, function(err, response) {
+		                if (err) return callback(err);
+		                return callback(null, response);
+		            });
+		        });
 			}
-			// Subdomains should be suffixes, not prefixes.
-			hostname.reverse();
-			var pluginId = hostname.join("-");
-			// `pointer` is a URI so we ask plugin `pluginId` (based on hostname) to resolve locator.
-	        return self.node.getPlugin(pluginId, function(err, plugin) {
-	            if (err) {
-					if (err.message === ("Cannot find module 'sm-plugin-" + pluginId + "'")) return callback(null, false);
-	            	return callback(err);
-	            }
-	            if (!plugin.hasOwnProperty("download")) return callback(null, false);
-				opts.logger.info("Asking plugin '" + pluginId + "' to download '" + uri + "' to external uri cache");
-	            return plugin.download(uri, options, function(err, response) {
-	                if (err) return callback(err);
-	                return callback(null, response);
-	            });
-	        });
-
-			return resolve(pluginId, callback);
+			return callback(null, false);
+		} catch(err) {
+			return callback(err);
 		}
-		return callback(null, false);
 	}
 
 	return fetchViaPlugin(function(err, response) {
@@ -217,7 +219,7 @@ Plugin.prototype.fetchExternalUri = function(uri, options, callback) {
 			console.error("ERROR", err.stack);
 		}
 		if (response) return callback(null, response);
-		opts.logger.info("Fetching '" + uri + "' to external uri cache using default fetcher");
+		if (opts.logger) opts.logger.info("Fetching '" + uri + "' to external uri cache using default fetcher");
 	    return self.externalUriCache.get(uri, opts, callback);
 	});
 }
