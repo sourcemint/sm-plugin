@@ -6,22 +6,30 @@ const HTTPS = require("https");
 const URI = require("sm-util/lib/uri");
 
 
+var rawPlugins = {};
 var externalProxies = {};
 
 exports.for = function(API, core, node, pluginId, callback) {
 	try {
-		var id = "sm-plugin-" + pluginId;
-		// TODO: Use dynamic `node.core.require(id)` here.
-		var pluginModule = require(id);
-		if (typeof pluginModule.for !== "function") {
-			return callback(new Error("Plugin '" + id + "' does not implement `exports.for = function(plugin)`."));
+		if (typeof rawPlugins[pluginId] === "undefined") {
+			var id = "sm-plugin-" + pluginId;
+			// TODO: Use dynamic `node.core.require(id)` here.
+			rawPlugins[pluginId] = require(id);
+			if (typeof rawPlugins[pluginId].for !== "function") {
+				rawPlugins[pluginId] = new Error("Plugin '" + id + "' does not implement `exports.for = function(plugin)`.");
+				return callback(rawPlugins[pluginId]);
+			}
+		} else
+		if (rawPlugins[pluginId] instanceof Error) {
+			return callback(rawPlugins[pluginId]);
 		}
 		var PluginInstance = function() {}
 		PluginInstance.prototype = new Plugin(API, core, node, pluginId);
 		var pluginInstance = new PluginInstance();
-		pluginModule.for(API, pluginInstance);
+		rawPlugins[pluginId].for(API, pluginInstance);
 		return callback(null, pluginInstance);
 	} catch(err) {
+		rawPlugins[pluginId] = err;
 		return callback(err);
 	}
 }
