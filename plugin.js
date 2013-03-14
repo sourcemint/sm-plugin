@@ -3,7 +3,6 @@ const PATH = require("path");
 const URL = require("url");
 const HTTP = require("http");
 const HTTPS = require("https");
-const URI = require("sm-util/lib/uri");
 
 
 var rawPlugins = {};
@@ -187,7 +186,7 @@ Plugin.prototype.fetchExternalUri = function(uri, options, callback) {
 				// Remove domain ending to leave host name. (e.g. remove `.com`).
 				var hostname = parsedPointer.hostname.split(".");
 				for (var i=hostname.length-1 ; i>=0 ; i--) {
-					if (URI.TLDS.indexOf(hostname[i].toUpperCase()) !== -1) {
+					if (self.API.URI.TLDS.indexOf(hostname[i].toUpperCase()) !== -1) {
 						hostname.splice(i, 1);				
 					}
 				}
